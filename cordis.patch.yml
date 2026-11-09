@@ -1,0 +1,21 @@
+# dsh-persona-evolve 自带挂载声明。
+# 装上之后，profile 的 dsh.profile.bundles 里列出 dsh-persona-evolve 即生效。
+
+- insert:
+    - id: persona-evolve
+      name: dsh-persona-evolve
+      config:
+        enabled: true
+        # 多久自省一次（小时）。168 = 一周
+        intervalHours: 168
+        # 要维护的人设文件（相对当前工作区，或写绝对路径）
+        personaFile: AGENTS.md
+        # 人设里"可以长"的那一节的标题前缀
+        section: 最近的样子
+        # 这一节最多留几条
+        maxLines: 8
+        # 模型：OpenAI 兼容接口即可
+        baseUrl: https://api.deepseek.com
+        model: deepseek-chat
+        # ⚠️ 填你自己的 key；留空则该插件不跑（不会瞎花钱）
+        apiKey: ''

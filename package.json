@@ -1,0 +1,49 @@
+{
+    "name":  "dsh-persona-evolve",
+    "version":  "0.2.2",
+    "description":  "让 DSH 的人设会自己长大：定时回看最近的聊天，只更新 AGENTS.md 里指定的『可演化』小节，铁律与边界永不动。带设置页。",
+    "type":  "module",
+    "main":  "index.js",
+    "exports":  {
+                    ".":  "./index.js",
+                    "./client":  "./client.js",
+                    "./cordis.patch.yml":  "./cordis.patch.yml",
+                    "./package.json":  "./package.json"
+                },
+    "files":  [
+                  "index.js",
+                  "evolve.js",
+                  "bin.mjs",
+                  "client.js",
+                  "cordis.patch.yml",
+                  "README.md"
+              ],
+    "keywords":  [
+                     "dsh",
+                     "dsh-plugin",
+                     "deepseek-harness",
+                     "persona",
+                     "agents-md",
+                     "self-evolution"
+                 ],
+    "license":  "MIT",
+    "engines":  {
+                    "node":  "\u003e=22"
+                },
+    "dependencies":  {
+
+                     },
+    "dsh":  {
+                "bundle":  {
+                               "patch":  "./cordis.patch.yml"
+                           },
+                "client":  {
+                               "platform":  "web",
+                               "inject":  [
+                                              "@deepseek-ai/dsh-client-runtime",
+                                              "@deepseek-ai/dsh-client-ui-settings",
+                                              "@deepseek-ai/dsh-client-ui-settings-plugins"
+                                          ]
+                           }
+            }
+}
