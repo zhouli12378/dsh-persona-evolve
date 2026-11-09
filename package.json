@@ -45,5 +45,16 @@
                                               "@deepseek-ai/dsh-client-ui-settings-plugins"
                                           ]
                            }
-            }
+            },
+    "repository":  {
+                       "type":  "git",
+                       "url":  "git+https://github.com/zhouli12378/dsh-persona-evolve.git"
+                   },
+    "homepage":  "https://github.com/zhouli12378/dsh-persona-evolve#readme",
+    "bugs":  {
+                 "url":  "https://github.com/zhouli12378/dsh-persona-evolve/issues"
+             },
+    "publishConfig":  {
+                          "access":  "public"
+                      }
 }
