@@ -15,7 +15,7 @@ import { readFile, writeFile, readdir, stat, mkdir } from 'node:fs/promises';
 import { join, isAbsolute } from 'node:path';
 import { homedir } from 'node:os';
 import { zstdDecompressSync } from 'node:zlib';
-import { evolve, transcriptFromMessages } from './evolve.js';
+import { evolve, transcriptFromMessages, decodeZstdFrames } from './evolve.js';
 
 export const name = 'persona-evolve';
 
@@ -145,7 +145,7 @@ async function readSessions(dir, limit = 4) {
     let raw;
     try {
       const buf = await readFile(f);
-      raw = f.endsWith('.zstd') ? zstdDecompressSync(buf).toString('utf8') : buf.toString('utf8');
+      raw = f.endsWith('.zstd') ? decodeZstdFrames(buf).toString('utf8') : buf.toString('utf8');
     } catch { continue; }
     for (const line of raw.split('\n')) {
       if (!line.trim()) continue;

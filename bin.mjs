@@ -12,8 +12,8 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
-import { zstdDecompressSync } from 'node:zlib';
-import { evolve, transcriptFromMessages } from './evolve.js';
+
+import { evolve, transcriptFromMessages, decodeZstdFrames } from './evolve.js';
 
 function arg(name, fallback) {
   const i = process.argv.indexOf('--' + name);
@@ -77,7 +77,7 @@ async function readSessions(dir, limit = 3) {
     let raw;
     try {
       const buf = await readFile(f);
-      raw = f.endsWith('.zstd') ? zstdDecompressSync(buf).toString('utf8') : buf.toString('utf8');
+      raw = f.endsWith('.zstd') ? decodeZstdFrames(buf).toString('utf8') : buf.toString('utf8');
     } catch { continue; }
     for (const line of raw.split('\n')) {
       if (!line.trim()) continue;

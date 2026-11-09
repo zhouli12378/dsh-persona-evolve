@@ -6,6 +6,42 @@
 
 import { readFile, writeFile, copyFile, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
+import { zstdDecompressSync } from 'node:zlib';
+
+/**
+ * 解压 DSH 的会话文件。
+ *
+ * 坑：会话 .jsonl.zstd 是**很多个独立 zstd 帧首尾相接**（一次追加一帧）。
+ * `zstdDecompressSync(整个文件)` 只会解出第一帧（通常就是那行 session 头），
+ * `createZstdDecompress()` 流式解会报 "Unknown frame descriptor"。
+ * 正解：按 magic(28 b5 2f fd) 切开，逐帧解再拼接。
+ */
+export function decodeZstdFrames(buf) {
+  const isMagic = (b, i) => b[i] === 0x28 && b[i + 1] === 0xb5 && b[i + 2] === 0x2f && b[i + 3] === 0xfd;
+  const findMagic = (b, from) => {
+    for (let i = from; i + 3 < b.length; i++) if (isMagic(b, i)) return i;
+    return -1;
+  };
+  const parts = [];
+  let i = 0;
+  while (i < buf.length) {
+    if (!isMagic(buf, i)) { i++; continue; }
+    let next = findMagic(buf, i + 4);
+    let done = false;
+    while (!done) {
+      const end = next < 0 ? buf.length : next;
+      try {
+        parts.push(zstdDecompressSync(buf.subarray(i, end)));
+        i = end;
+        done = true;
+      } catch {
+        if (next < 0) { i = buf.length; done = true; }
+        else next = findMagic(buf, next + 4);
+      }
+    }
+  }
+  return Buffer.concat(parts);
+}
 
 /** 在 markdown 里定位 `## <title>` 这一节，返回其正文的行区间与原始文本。 */
 export function locateSection(text, title) {
