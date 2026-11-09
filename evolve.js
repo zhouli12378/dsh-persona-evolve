@@ -77,7 +77,8 @@ export function stripFences(s) {
  * 返回 { ok, bullets, reason }
  */
 export function normalizeBullets(raw, maxLines = 8) {
-  const text = stripFences(raw);
+  // 模型偶尔会把两条挤在一行（"…不装- 深夜还是…"）：先把行内的小圆点拆出来
+  const text = stripFences(raw).replace(/([^\n\s])\s*-\s+(?=[^\s])/g, '$1\n- ');
   const bullets = text
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -94,7 +95,16 @@ export function normalizeBullets(raw, maxLines = 8) {
     }
     if (b.length > 120) return { ok: false, bullets: [], reason: '有条目太长（>120 字）' };
   }
-  return { ok: true, bullets: bullets.slice(0, maxLines), reason: '' };
+  // 去重（模型有时把开头的条目又在末尾重复一遍）
+  const uniq = [];
+  const seen = new Set();
+  for (const b of bullets) {
+    const k = b.replace(/^-\s+/, '').trim();
+    if (seen.has(k)) continue;
+    seen.add(k);
+    uniq.push(b);
+  }
+  return { ok: true, bullets: uniq.slice(0, maxLines), reason: '' };
 }
 
 /** 拼提示词：只让模型产出小节条目，别碰别的。 */
