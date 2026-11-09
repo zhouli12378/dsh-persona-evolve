@@ -62,10 +62,18 @@
 
 ## 安装
 
+**从 GitHub（已验证可用）**
+
 ```bash
-# 本地目录安装
+pnpm add github:zhouli12378/dsh-persona-evolve
+# 或者，用 dsh 的插件命令：
+dsh plugin add github:zhouli12378/dsh-persona-evolve
+```
+
+**从本地目录**
+
+```bash
 dsh plugin --profile <你的profile> add link:D:\path\to\dsh-persona-evolve
-# 或打进 profile 的 bundles
 ```
 
 然后在 profile 的 `dsh.profile.bundles` 里加上 `dsh-persona-evolve`，重启 DSH。
