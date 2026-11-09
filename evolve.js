@@ -84,7 +84,7 @@ export function normalizeBullets(raw, maxLines = 8) {
     .filter(Boolean)
     .filter((l) => /^[-*]\s+/.test(l))
     .map((l) => '- ' + l.replace(/^[-*]\s+/, '').trim())
-    .filter((l) => l.length > 3);
+    .filter((l) => l.replace(/^[-*]\s+/, '').trim().length > 0);
 
   if (bullets.length === 0) return { ok: false, bullets: [], reason: '模型没给出任何条目' };
   const forbidden = ['铁律', '## ', 'ignore previous', '忽略以上', '忽略之前的指示'];
@@ -155,7 +155,18 @@ export async function evolve({ personaPath, sectionTitle, maxLines = 8, transcri
   const prompt = buildPrompt({ sectionTitle, sectionBody: oldBullets || found.body, transcript, maxLines });
   const raw = await chat(prompt);
   const { ok, bullets, reason } = normalizeBullets(raw, maxLines);
-  if (!ok) return { changed: false, reason, before: oldBullets, after: oldBullets };
+  if (!ok) {
+    const snippet = stripFences(raw).replace(/\s+/g, ' ').slice(0, 240);
+    const why = reason + '｜模型原文：' + (snippet || '(空)');
+    if (logPath) {
+      try {
+        const prev = await readFile(logPath, 'utf8').catch(() => '');
+        const stamp = new Date().toISOString();
+        await writeFile(logPath, prev + '\n### ' + stamp + ' 失败\n' + why + '\n', 'utf8');
+      } catch { /* 日志失败不影响主流程 */ }
+    }
+    return { changed: false, reason: why, before: oldBullets, after: oldBullets };
+  }
 
   const after = bullets.join('\n');
   const changed = after.trim() !== oldBullets.trim();

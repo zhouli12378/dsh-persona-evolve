@@ -1,6 +1,6 @@
 {
     "name":  "dsh-persona-evolve",
-    "version":  "0.2.3",
+    "version":  "0.2.5",
     "description":  "让 DSH 的人设会自己长大：定时回看最近的聊天，只更新 AGENTS.md 里指定的『可演化』小节，铁律与边界永不动。带设置页。",
     "type":  "module",
     "main":  "index.js",

@@ -70,16 +70,27 @@ function resolveChat(ctx, cfg) {
             .filter((m) => m.role !== 'system')
             .map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: [{ type: 'text', text: String(m.content ?? '') }] }));
           let out = '';
+          let finish = '';
           for await (const chunk of llm.stream({
             provider: route.provider,
             model: route.model,
             ...(sys ? { system: sys } : {}),
             messages: rest,
-            maxTokens: 700,
+            maxTokens: 2000,
             temperature: 0.4,
           })) {
             if (chunk?.type === 'text-delta') out += String(chunk.text ?? '');
-            else if (chunk?.type === 'finish') break;
+            else if (chunk?.type === 'block-end') {
+              const block = chunk.block;
+              if (block && block.type === 'text' && typeof block.text === 'string') out += block.text;
+            } else if (chunk?.type === 'finish') {
+              const reason = chunk.reason;
+              finish = typeof reason === 'object' ? String(reason?.kind ?? '') : String(reason ?? '');
+              break;
+            }
+          }
+          if (!out.trim()) {
+            throw new Error('宿主模型没有返回正文（finish=' + (finish || '?') + '）');
           }
           return out;
         },
